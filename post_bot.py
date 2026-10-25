@@ -330,7 +330,7 @@ def format_row(key):
 
 # A pool of unique human-written title prefixes to break structural repetitions
 title_variations = [
-    "The Market Is Flashing Green Again",
+    "The Crypto Market Looks Calm, But Is It?",
     "Bitcoin and Friends Are Making Their Move",
     "The Crypto Rally Is Building Momentum",
     "Big Moves Across the Digital Asset Space",
