@@ -121,8 +121,8 @@ rc_manabar = account_info.get_rc_manabar()
 current_rc = (rc_manabar['current_mana'] / rc_manabar['max_mana']) * 100
 print(f"Account @{MY_ACCOUNT} Live Resource Credits check: {current_rc:.2f}%")
 
-if current_rc < 79.0:
-    print(f"⚠️ Safety Halt: Resource Credits dropped below the 79% threshold. Current Credits are {current_rc:.2f}% filled. Second post has been discarded.")
+if current_rc < 90.0:
+    print(f"⚠️ Safety Halt: Resource Credits dropped below the 90% threshold. Current Credits are {current_rc:.2f}% filled. Second post has been discarded.")
     exit(0)
 
 # Unified standard structured ledger map dictionary
