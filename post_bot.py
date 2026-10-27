@@ -23,7 +23,7 @@ time.sleep(random_delay_seconds)
 # ==========================================
 MY_ACCOUNT = "blog.god"  
 TARGET_COMMUNITY = "hive-129948"  
-CUSTOM_TAGS = ["art", "crypto", "blockchain", "blog"]
+CUSTOM_TAGS = ["steemexclusive", "abb-powerup"]
 CRYPTO_KEYWORDS = ["crypto", "cryptocurrency"]
 
 # Ultra-low RC asset images mapped explicitly (Per coin asset category)
@@ -121,8 +121,8 @@ rc_manabar = account_info.get_rc_manabar()
 current_rc = (rc_manabar['current_mana'] / rc_manabar['max_mana']) * 100
 print(f"Account @{MY_ACCOUNT} Live Resource Credits check: {current_rc:.2f}%")
 
-if current_rc < 90.0:
-    print(f"⚠️ Safety Halt: Resource Credits dropped below the 90% threshold. Current Credits are {current_rc:.2f}% filled. Second post has been discarded.")
+if current_rc < 87.0:
+    print(f"⚠️ Safety Halt: Resource Credits dropped below the 87% threshold. Current Credits are {current_rc:.2f}% filled. Second post has been discarded.")
     exit(0)
 
 # Unified standard structured ledger map dictionary
@@ -471,6 +471,10 @@ body_lines = [
     format_row('sol'),
     f"\n🔺**Top Gainer:** {top_coin_key.upper()}\n",
     f"![{selected_prefix}]({selected_display_image})",
+    "[My Bengali Blog](https://www.steemit.com/trending/hive-129948) & [Discord](https://discord.gg/amarbanglablog)\n",
+    "https://cdn.steemitimages.com/DQmZvVRHsowjHm4n9wHe1VvXceqbaTUYsquTVAUX9GsBQcf/IMG_20220926_174120.png\n",
+    "Vote [bangla.witness](https://steemlogin.com/sign/account-witness-vote?witness=bangla.witness&approve=true) Or Set @rme as your [proxy](https://steemitwallet.com/witnesses)\n",
+    "https://cdn.steemitimages.com/DQmRXkkCEbXLYwhPEYqkaUbwhy4FaqarQVhnzkh1Awp3GRw/witness_proxy_vote.png\n",
     f'<div class="footer">\n  <div class="pull-left">\n    Author: @blog.god\n  </div>\n  <div class="pull-right">\n    <img src="https://cdn.steemitimages.com/DQmeJV5dmDXBLXQHGxdfsDggpQNgBymH7wuuQSZ4pmyACVi/1000029381.png" alt="Footer" />\n  </div>\n</div>\n<div class="pull-left">\n  ©EGM 2016 - 2036\n</div>'
 ]
 
