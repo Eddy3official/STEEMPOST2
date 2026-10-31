@@ -23,7 +23,7 @@ time.sleep(random_delay_seconds)
 # ==========================================
 MY_ACCOUNT = "blog.god"  
 TARGET_COMMUNITY = "hive-129948"  
-CUSTOM_TAGS = ["steemexclusive", "abb-powerup", "beautyofcreativity", "boc"]
+CUSTOM_TAGS = ["steemexclusive", "abb-powerup", "beautyofcreativity", "risefig"]
 CRYPTO_KEYWORDS = ["crypto", "cryptocurrency"]
 
 # Ultra-low RC asset images mapped explicitly (Per coin asset category)
