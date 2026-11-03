@@ -13,7 +13,7 @@ import websocket
 # =========================================================================
 # GITHUB ACTIONS RUNTIME DELAY BUFFER
 # =========================================================================
-random_delay_seconds = random.randint(60, 900)
+random_delay_seconds = random.randint(60, 60)
 print(f"Cloudflare handshake cleared. Shifting execution delay to GitHub Actions context...")
 print(f"Jitter activated: Sleeping for {random_delay_seconds / 60:.1f} minutes before posting...")
 time.sleep(random_delay_seconds)
@@ -205,7 +205,7 @@ rc_manabar = account_info.get_rc_manabar()
 current_rc = (rc_manabar['current_mana'] / rc_manabar['max_mana']) * 100
 print(f"Account @{MY_ACCOUNT} Live Resource Credits check: {current_rc:.2f}%")
 
-if current_rc < 90.0:
+if current_rc < 80.0:
     print(f"⚠️ Safety Halt: Resource Credits dropped below threshold ({current_rc:.2f}%). Execution skipped.")
     exit(0)
 
