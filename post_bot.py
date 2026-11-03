@@ -373,97 +373,75 @@ def format_row(key):
     price_str = f"${coin['price']:,.2f}" if coin['price'] >= 1 else f"${coin['price']:.4f}"
     return f"* 🪙 **{coin['name']} ({key.upper()}):** {price_str} | {emoji}{coin['change']:.2f}%"
 
-# Title variations pool
-title_variations = [
-    "The Crypto Market is Crazy Today!",
-    "What's Happening On The Crypto World?",
-    "BTC, XRP, ETH, BNB And SOLANA Are Moving!",
-    "Crypto Market Prices Update",
-    "Is a Crypto Breakout Happening Right Now?",
-    "The Complete Daily Crypto Asset Report",
-    "Where is the Crypto Market Heading Today?",
-    "A Quick Look at Today's Crypto Movements",
-    "Crypto Prices Are Shifting Fast Today!",
-    "Your Essential Daily Crypto Market Ingest",
-    "Major Volatility Hitting Top Crypto Coins!",
-    "Checking In On The Crypto World Today",
-    "Are the Top Cryptos Gaining Momentum?",
-    "Unpacking Today's Crypto Market Action",
-    "The Big 5 Cryptos Are Shaking Up the Market!",
-    "A Quick Breakdown of Today's Crypto Prices",
-    "An Interesting Day in the Crypto Space!",
-    "Tracking Today's Top Cryptocurrencies",
-    "The Latest Shifts in the Crypto Market",
-    "Where the Top 5 Crypto Coins Stand Today",
-    "Digital Gold Moves: Today's Bitcoin & Altcoin Action",
-    "Decentralized Markets on Fire - Your Crypto Update",
-    "Blockchain Surge: Which Coins Are Leading Today?",
-    "Altseason Signals? Tracking the Top 5 Performers",
-    "Crypto Momentum Check: Real-Time Market Snapshot",
-    "The DeFi Effect: How the Market is Shifting Now",
-    "Hodlers' Guide: Today's Most Volatile Digital Assets",
-    "From Bitcoin to Solana: Market Movements Explained",
-    "Tokenomics in Action: Live Crypto Price Analysis",
-    "The Weekly Crypto Pulse: Major Shifts Happening",
-    "Smart Money Alert: Where Crypto Prices Are Heading",
-    "Layer 2 vs Layer 1: Who's Winning Today?",
-    "Mining the Data: Your Daily Blockchain Market Brief",
-    "Whale Watch: Tracking Big Moves in Today's Crypto",
-    "The Bull's Handbook: Essential Daily Crypto Metrics",
-    "Staking Spotlight: Coins Making Waves in the Market",
-    "Mempool Meter: Real-Time Crypto Market Insights",
-    "The Bear Case & Bull Case for Today's Top Cryptos",
-    "Exchange Flows: Understanding Today's Price Action",
-    "Bullish Signals: Is Crypto Ready for Liftoff?",
-    "Bitcoin Breakout Watch: The Market Is Moving Fast",
-    "Volatility Spikes: Altcoins Lead the Charge Today",
-    "Crypto Heatmap: Biggest Movers in the Digital Market",
-    "The Smart Investor's Daily Crypto Trend Report",
-    "Ethereum Pulse: Is the Bull Run Back in Motion?",
-    "Signal from the Chain: What Crypto Traders Need to Know",
-    "Top Coins in Motion: A Fresh Market Snapshot",
-    "Bitcoin, Ethereum, and the Rest of the Pack",
-    "The Daily Crypto Rush: Winners and Losers",
-    "Market Momentum Watch: Crypto Prices Are Shifting",
-    "When Crypto Turns Hot: The Biggest Gainers Today",
-    "Inside the Crypto Cycle: What Is Really Happening?",
-    "New Highs or Fakeouts? Breaking Down Today's Moves",
-    "The Next Crypto Wave: Which Coins Are Heating Up?",
-    "Weekend Crypto Watch: Price Action Across the Board",
-    "On-Chain Signals: What the Market Is Telling Us",
-    "Risk On, Risk Off: Crypto Is Moving Again",
-    "The Highest Movers: A Quick Crypto Market Rundown",
-    "Big Moves, Big Charts: Today's Crypto Leaders",
-    "As Bitcoin Moves, the Altcoins Follow Suit",
-    "Crypto Gains and Losses: The Daily Breakdown",
-    "The Market's Pulse: A Quick Look at Top Tokens",
-    "Fresh Crypto Data: A Daily Shot of Market Energy",
-    "The Digital Asset Ledger: What Changed Today?",
-    "Trend Watch: Crypto Prices Are Repricing Fast",
-    "Momentum in Motion: A Closer Look at the Top Coins",
-    "Chain Reaction: Where Crypto Is Heading Today",
-    "Directional Bias: Which Crypto Assets Are Leading?",
-    "Top Crypto Movers: Price Action You Can't Ignore",
-    "Daily Market Fuel: The Biggest Crypto Stories Today",
-    "Moonshot Watch: Which Coins Are Leading The Surge?",
-    "The Crypto Pulse: Trading Activity Is Building",
-    "Market Rotation: Which Coins Are Taking the Lead?",
-    "A Hot Day in Crypto: Gains, Losses, and Breakouts",
-    "The Weekly Crypto Watch: Trends Shaping the Market",
-    "Bitcoin and Friends: A Quick Read of Today's Moves",
-    "Crypto Ladder: Who Is Climbing Highest Right Now?",
-    "Price Action Review: Today's Top Digital Assets",
-    "Breaking Down the Big 5: Crypto Winners and Losers",
-    "The Crypto Board Is Moving: A Fast Market Update",
-    "Big Volume, Big Questions: What Crypto Is Saying",
-    "Bullish Pressure: Which Coins Are Leading the Rally?",
-    "Fresh Crypto Signals: The Market Is Getting Active",
-    "From Bitcoin to Solana: The Top Coin Story Today",
-    "Trading the Tape: Today's Biggest Crypto Moves",
-    "The Major Coins Are Talking: Here's What They Mean",
-    "The Crypto Market Is Stirring Again: What to Watch"
-]
-selected_prefix = random.choice(title_variations)
+# ==========================================
+# HUMANOID, NON-COLON TITLE POOLS
+# ==========================================
+coin_title_pools = {
+    'btc': [
+        "Bitcoin is leading the pack again today",
+        "Looks like Bitcoin is making some serious moves",
+        "Why everyone is talking about Bitcoin right now",
+        "Bitcoin is setting the pace for the whole market",
+        "Catching up with Bitcoin and today's price action",
+        "Is Bitcoin getting ready for another big breakout",
+        "Checking in on what Bitcoin is up to today",
+        "Bitcoin is stealing the spotlight once again",
+        "A closer look at how Bitcoin is performing today",
+        "Why Bitcoin is driving the conversation today"
+    ],
+    'eth': [
+        "Ethereum is quietly making some impressive moves",
+        "Checking out Ethereum and where the altcoins are heading",
+        "Ethereum is heating up nicely in today's market",
+        "Why Ethereum is catching everyone's attention today",
+        "Taking a walk through Ethereum's latest price swings",
+        "Ethereum is leading the altcoin charge today",
+        "Seeing some great momentum on Ethereum right now",
+        "What is going on with Ethereum today",
+        "Ethereum is making waves in the market once more",
+        "A quick check on Ethereum's daily momentum"
+    ],
+    'bnb': [
+        "BNB is showing everyone how it's done today",
+        "Catching up with BNB and the broader exchange tokens",
+        "BNB is putting on a solid show in today's market",
+        "Why BNB is standing out among the top coins",
+        "Taking a quick look at BNB's price action today",
+        "BNB is making some nice headway in the charts",
+        "Keeping an eye on BNB as it leads the board",
+        "BNB is looking pretty strong in today's session",
+        "What's driving BNB's latest moves today",
+        "BNB is holding its ground and leading the gainers"
+    ],
+    'xrp': [
+        "XRP is making some noise in the market today",
+        "Seeing a nice push from XRP in today's session",
+        "Why XRP is stealing a bit of the spotlight today",
+        "Catching up with XRP's latest price movements",
+        "XRP is putting together a solid run today",
+        "Taking a look at why XRP is leading the charts",
+        "XRP is making some interesting waves right now",
+        "A quick check on how XRP is holding up today",
+        "XRP is showing some great energy in the market",
+        "What's happening with XRP in today's trading"
+    ],
+    'sol': [
+        "Solana is flying high and leading the charge today",
+        "Checking out Solana's latest fast-paced moves",
+        "Solana is putting on quite a show in the markets",
+        "Why Solana is outperforming the crowd today",
+        "Taking a look at Solana's momentum right now",
+        "Solana is catching a serious wave in today's session",
+        "What is pushing Solana to the front of the pack",
+        "Solana is keeping things exciting in the market today",
+        "A quick check on Solana's impressive run",
+        "Solana is showing off some serious strength today"
+    ]
+}
+
+# Select title based specifically on the top coin performer
+selected_pool = coin_title_pools.get(top_coin_key, coin_title_pools['btc'])
+selected_prefix = random.choice(selected_pool)
 post_title = selected_prefix
 
 raw_slug = selected_prefix.lower()
@@ -472,7 +450,7 @@ slug_str = "-".join("".join(clean_chars).split())
 post_permlink = f"{slug_str}-{now_eat.strftime('%Y%m%d')}"
 scanned_post_data = scan_latest_crypto_post(stm_check)
 
-print(f"✅ Dynamic Title Generated: '{post_title}'")
+print(f"✅ Dynamic Title Generated for [{top_coin_key.upper()}]: '{post_title}'")
 print(f"✅ Matching Permlink Slug compiled: '{post_permlink}'")
 
 body_lines = [
