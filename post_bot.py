@@ -25,7 +25,7 @@ time.sleep(random_delay_seconds)
 MY_ACCOUNT = "blog.god"  
 TARGET_COMMUNITY = "hive-129948"  
 CUSTOM_TAGS = ["crypto", "cryptocurrency"]
-CRYPTO_KEYWORDS = ["crypto", "hodl", "usdt", "cryptocurrency", "bitcoin", "btc", "ethereum", "eth", "solana", "sol", "xrp", "ripple", "binance", "kr", "coingeco", "avle", "bnb", "trading", "blockchain"]
+CRYPTO_KEYWORDS = ["crypto", "hodl", "usdt", "cryptocurrency", "bitcoin", "btc", "blockchain"]
 
 # ==========================================
 # 2. DYNAMIC IMAGE GENERATOR & MULTI-CDN UPLOADER
