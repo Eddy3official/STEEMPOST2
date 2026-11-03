@@ -30,70 +30,109 @@ CRYPTO_KEYWORDS = ["crypto", "hodl", "usdt", "cryptocurrency", "bitcoin", "btc",
 # ==========================================
 # 2. DYNAMIC IMAGE GENERATOR & MULTI-CDN UPLOADER
 # ==========================================
-def generate_crypto_banner(top_coin_symbol, top_coin_name, top_coin_price, top_coin_change):
+def generate_crypto_banner(post_title, top_coin_symbol, top_coin_name, top_coin_price, top_coin_change):
     """
-    Generates a unique, professional landscape crypto graphic using Pillow,
-    featuring randomized abstract geometric art, sharp formatting, and author credit.
+    Generates a unique, professional landscape crypto graphic using Pillow with 
+    supersampling (2x scale downsampled via LANCZOS), procedural geometric backgrounds,
+    and automatic text wrapping to guarantee no spillage.
     """
-    width, height = 1200, 630
+    # Supersampling scale for crisp, professional anti-aliasing
+    scale = 2
+    width, height = 1200 * scale, 630 * scale
+    
     image = Image.new("RGB", (width, height), color="#0d1117")
-    draw = ImageDraw.Draw(image)
+    draw = ImageDraw.Draw(image, "RGBA")
     
     random.seed()
     
-    # Draw randomized abstract background mesh lines
-    for _ in range(35):
+    # Infinite Pro-Level Theme: Randomized abstract background mesh lines with alpha
+    for _ in range(45):
         x1 = random.randint(0, width)
         y1 = random.randint(0, height)
-        x2 = x1 + random.randint(100, 400)
-        y2 = y1 + random.randint(50, 300)
+        x2 = x1 + random.randint(150 * scale, 500 * scale)
+        y2 = y1 + random.randint(100 * scale, 350 * scale)
         line_color = random.choice([
-            "#1f6feb", "#2ea043", "#8957e5", "#388bfd", "#238636", "#bc8cff"
+            "#1f6feb33", "#2ea04333", "#8957e533", "#388bfd33", "#23863633", "#bc8cff33"
         ])
-        draw.line([x1, y1, x2, y2], fill=line_color, width=random.randint(1, 3))
+        draw.line([x1, y1, x2, y2], fill=line_color, width=random.randint(2 * scale, 5 * scale))
 
-    # Draw semi-transparent background blobs
-    for _ in range(5):
-        cx = random.randint(100, width - 100)
-        cy = random.randint(100, height - 100)
-        r = random.randint(80, 250)
-        draw.ellipse([cx - r, cy - r, cx + r, cy + r], outline="#30363d", width=2)
+    # Randomized background glowing structural blobs
+    for _ in range(6):
+        cx = random.randint(150 * scale, width - 150 * scale)
+        cy = random.randint(150 * scale, height - 150 * scale)
+        r = random.randint(100 * scale, 300 * scale)
+        draw.ellipse([cx - r, cy - r, cx + r, cy + r], outline="#30363d55", width=2 * scale)
 
-    # Typography setup with fallbacks
+    # Typography setup with proportional scaling
     try:
-        title_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 54)
-        subtitle_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 32)
-        credit_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 24)
+        title_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 44 * scale)
+        subtitle_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 28 * scale)
+        credit_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 22 * scale)
     except IOError:
         title_font = ImageFont.load_default()
         subtitle_font = ImageFont.load_default()
         credit_font = ImageFont.load_default()
 
-    header_text = "DAILY CRYPTO MARKET LEADER"
-    coin_label = f"{top_coin_name} ({top_coin_symbol.upper()})"
+    # Main Card Box Container
+    box_margin = 60 * scale
+    draw.rectangle([box_margin, box_margin, width - box_margin, height - box_margin], fill="#161b22EE", outline="#30363d", width=2 * scale)
     
+    # Robust text wrapping helper to prevent spillage
+    def wrap_text(text, font, max_width):
+        words = text.split()
+        lines = []
+        current_line = []
+        for word in words:
+            test_line = " ".join(current_line + [word])
+            # Use getlength() for accurate modern font measuring in Pillow
+            bbox = font.getbbox(test_line)
+            w = bbox[2] - bbox[0]
+            if w <= max_width:
+                current_line.append(word)
+            else:
+                if current_line:
+                    lines.append(" ".join(current_line))
+                current_line = [word]
+        if current_line:
+            lines.append(" ".join(current_line))
+        return lines
+
+    # Wrap the selected post title so it fits cleanly inside the card layout
+    max_text_width = width - (240 * scale)
+    wrapped_title_lines = wrap_text(post_title, title_font, max_text_width)
+    
+    # Render wrapped post title lines dynamically
+    current_y = 100 * scale
+    for line in wrapped_title_lines[:2]: # Max 2 lines for title
+        draw.text((100 * scale, current_y), line, fill="#ffffff", font=title_font)
+        current_y += 55 * scale
+
+    # Coin Market Info Layout
+    coin_label = f"Featured Leader: {top_coin_name} ({top_coin_symbol.upper()})"
     price_str = f"${top_coin_price:,.2f}" if top_coin_price >= 1 else f"${top_coin_price:.4f}"
     change_str = f"+{top_coin_change:.2f}%" if top_coin_change >= 0 else f"{top_coin_change:.2f}%"
     change_color = "#3fb950" if top_coin_change >= 0 else "#f85149"
 
-    # Main Card Box
-    draw.rectangle([60, 60, width - 60, height - 60], fill="#161b22", outline="#30363d", width=2)
-    
-    # Text Layout
-    draw.text((100, 100), header_text, fill="#8b949e", font=subtitle_font)
-    draw.text((100, 150), coin_label, fill="#ffffff", font=title_font)
-    draw.text((100, 270), f"Price: {price_str}", fill="#c9d1d9", font=subtitle_font)
-    draw.text((100, 320), f"24h Change: {change_str}", fill=change_color, font=subtitle_font)
+    current_y += 20 * scale
+    draw.text((100 * scale, current_y), coin_label, fill="#8b949e", font=subtitle_font)
+    current_y += 45 * scale
+    draw.text((100 * scale, current_y), f"Price: {price_str}   |   24h Change: {change_str}", fill=change_color if top_coin_change != 0 else "#c9d1d9", font=subtitle_font)
 
     # Author Credit (Bottom Right Corner)
     credit_text = "Author: @blog.god"
-    credit_x, credit_y = width - 300, height - 110
-    draw.rectangle([credit_x - 15, credit_y - 10, width - 90, height - 70], fill="#21262d", outline="#30363d")
-    draw.text((credit_x, credit_y - 5), credit_text, fill="#58a6ff", font=credit_font)
+    credit_w, credit_h = 240 * scale, 50 * scale
+    credit_x = width - box_margin - credit_w - (20 * scale)
+    credit_y = height - box_margin - credit_h - (20 * scale)
+    
+    draw.rectangle([credit_x, credit_y, credit_x + credit_w, credit_y + credit_h], fill="#21262d", outline="#30363d", width=scale)
+    draw.text((credit_x + (20 * scale), credit_y + (12 * scale)), credit_text, fill="#58a6ff", font=credit_font)
+
+    # Downscale canvas using high-quality LANCZOS resampling for razor-sharp rendering
+    image = image.resize((1200, 630), Image.Resampling.LANCZOS)
 
     output_filename = f"crypto_banner_{top_coin_symbol.lower()}.jpg"
     image.save(output_filename, "JPEG", quality=95)
-    print(f"✅ Custom banner rendered locally: '{output_filename}'")
+    print(f"✅ Custom crystal-clear banner rendered locally: '{output_filename}'")
     return output_filename
 
 def upload_image_to_cdn(image_path):
@@ -205,7 +244,7 @@ rc_manabar = account_info.get_rc_manabar()
 current_rc = (rc_manabar['current_mana'] / rc_manabar['max_mana']) * 100
 print(f"Account @{MY_ACCOUNT} Live Resource Credits check: {current_rc:.2f}%")
 
-if current_rc < 89.0:
+if current_rc < 86.0:
     print(f"⚠️ Safety Halt: Resource Credits dropped below threshold ({current_rc:.2f}%). Execution skipped.")
     exit(0)
 
@@ -344,8 +383,179 @@ def scan_latest_crypto_post(blockchain_instance):
 top_coin_key = max(market_data.keys(), key=lambda k: market_data[k]['change'])
 top_performer = market_data[top_coin_key]
 
-# Generate local binary custom graphic and upload to CDN
+# ==========================================
+# HUMANOID, NON-COLON TITLE POOLS (REWRITTEN & NATURAL)
+# ==========================================
+coin_title_pools = {
+    'btc': [
+        "Bitcoin leads the charge once again",
+        "Here is why Bitcoin is catching everyone's eye today",
+        "Taking a quick look at Bitcoin's latest momentum",
+        "Bitcoin continues to set the pace across the market",
+        "How Bitcoin is shaping today's trading session",
+        "An honest look at where Bitcoin is heading next",
+        "Bitcoin refuses to slow down in today's market",
+        "Checking in on Bitcoin's steady climb",
+        "Why traders are keeping a close watch on Bitcoin",
+        "Bitcoin brings some fresh excitement to the charts",
+        "Breaking down today's interesting Bitcoin price action",
+        "Bitcoin holds its ground while the rest of the market shifts",
+        "A closer look at why Bitcoin is dominating discussions",
+        "Bitcoin puts on another strong display today",
+        "What the latest Bitcoin moves mean for the broader market",
+        "Bitcoin keeps the momentum going with a solid push",
+        "Reflecting on Bitcoin's strong performance today",
+        "Why early buyers are excited about Bitcoin right now",
+        "Bitcoin proves once again why it leads the pack",
+        "A fresh perspective on Bitcoin's daily chart action",
+        "Bitcoin stays resilient through today's market swings",
+        "Why Bitcoin remains the talk of the crypto community",
+        "Bitcoin surprises the market with another great run",
+        "Navigating today's trends with Bitcoin at the helm",
+        "A friendly reminder of why Bitcoin commands attention",
+        "Bitcoin delivers another day of reliable growth",
+        "Why everyone is talking about Bitcoin this morning",
+        "Bitcoin powers through resistance with style",
+        "Taking stock of Bitcoin's impressive weekly trend",
+        "Bitcoin keeps things interesting with today's price action"
+    ],
+    'eth': [
+        "Ethereum is quietly making some impressive moves",
+        "Catching up with Ethereum and the broader altcoin market",
+        "Ethereum is heating up nicely in today's session",
+        "Why Ethereum is drawing a crowd right now",
+        "Taking a walk through Ethereum's latest price swings",
+        "Ethereum leads the altcoin charge with confidence",
+        "Seeing some great momentum building on Ethereum",
+        "What is going on with Ethereum in today's market",
+        "Ethereum makes waves as trading volume picks up",
+        "A quick check on Ethereum's daily momentum",
+        "Ethereum shows solid resilience on a busy trading day",
+        "Why smart contract fans are buzzing about Ethereum",
+        "Ethereum puts on a clinic in today's market session",
+        "The latest updates on Ethereum's price action",
+        "Ethereum steps up its game as market interest grows",
+        "Why Ethereum is turning heads across the board",
+        "Taking stock of Ethereum's journey through the charts",
+        "Ethereum builds a strong case for today's top assets",
+        "How Ethereum is reacting to the current market climate",
+        "An insightful look at Ethereum's daily trajectory",
+        "Ethereum stays right in the middle of the action",
+        "Why traders are talking non-stop about Ethereum",
+        "Ethereum navigates today's volatility like a pro",
+        "A closer inspection of Ethereum's recent gains",
+        "Ethereum carves out an independent path today",
+        "What makes Ethereum's current price move so fascinating",
+        "Ethereum keeps up a steady and reliable pace",
+        "Why Ethereum supporters have plenty to smile about",
+        "Ethereum proves its worth in today's active session",
+        "Catching the latest ripples from the Ethereum ecosystem"
+    ],
+    'bnb': [
+        "BNB shows everyone how it is done today",
+        "Catching up with BNB and exchange tokens",
+        "BNB puts on a solid show in today's market",
+        "Why BNB stands out among the top performers",
+        "Taking a quick look at BNB's price action today",
+        "BNB makes some nice headway on the charts",
+        "Keeping a close eye on BNB as it leads the board",
+        "BNB is looking pretty strong in today's session",
+        "What is driving BNB's latest moves today",
+        "BNB holds its ground among the top gainers",
+        "BNB continues to impress with steady daily growth",
+        "Why utility token enthusiasts love what BNB is doing",
+        "BNB makes a notable impression in today's trading",
+        "A quick dive into BNB's latest market position",
+        "BNB shows genuine strength during today's session",
+        "Why BNB is earning praise across crypto forums",
+        "Taking a closer look at BNB's persistent momentum",
+        "BNB navigates market shifts with cool confidence",
+        "How BNB maintains its edge in today's economy",
+        "An overview of BNB's exciting performance today",
+        "BNB proves reliable when traders need it most",
+        "Why BNB draws positive attention from all sides",
+        "BNB makes its presence known in the upper charts",
+        "A fresh look at BNB's steady climb today",
+        "BNB holds strong against changing market winds",
+        "What is behind BNB's pleasant performance today",
+        "BNB delivers another day of solid market action",
+        "Why BNB is worth watching closely right now",
+        "BNB keeps the energy high in today's trading rounds",
+        "Reflecting on BNB's consistent daily progress"
+    ],
+    'xrp': [
+        "XRP makes some welcome noise in the market today",
+        "Seeing a nice push from XRP in today's session",
+        "Why XRP is stealing a bit of the spotlight",
+        "Catching up with XRP's latest price movements",
+        "XRP puts together a remarkably solid run",
+        "Taking a look at why XRP is leading the charts",
+        "XRP makes some interesting waves right now",
+        "A quick check on how XRP is holding up today",
+        "XRP shows some great energy in the market",
+        "What is happening with XRP in today's trading",
+        "XRP surprises skeptics with today's action",
+        "Why cross-border token interest centers on XRP",
+        "XRP steps up with a refreshing market display",
+        "A deep dive into XRP's dynamic price swings",
+        "XRP captures the enthusiasm of daily traders",
+        "Why conversations are picking up around XRP",
+        "Taking stock of XRP's lively journey on the charts",
+        "XRP proves it can hold its own in any session",
+        "How XRP manages to stand out right now",
+        "An encouraging look at XRP's latest performance",
+        "XRP keeps market watchers thoroughly engaged",
+        "Why community sentiment around XRP is looking up",
+        "XRP bounces back with notable style today",
+        "A friendly reminder of why XRP remains popular",
+        "XRP navigates daily ups and downs smoothly",
+        "What makes XRP's current movement worth noting",
+        "XRP delivers a pleasant surprise for holders",
+        "Why everyone seems to be tracking XRP today",
+        "XRP pushes forward with great momentum right now",
+        "Reflecting on XRP's vibrant trading session"
+    ],
+    'sol': [
+        "Solana flies high and leads the charge today",
+        "Checking out Solana's latest fast-paced moves",
+        "Solana puts on quite a show in the markets",
+        "Why Solana is outperforming the crowd today",
+        "Taking a look at Solana's incredible momentum",
+        "Solana catches a serious wave in today's session",
+        "What is pushing Solana to the front of the pack",
+        "Solana keeps things exciting in the market today",
+        "A quick check on Solana's impressive run",
+        "Solana shows off some serious strength today",
+        "Solana refuses to slow down its rapid pace",
+        "Why speed and efficiency bring eyes to Solana",
+        "Solana dominates conversation with stellar moves",
+        "A close look at Solana's blazing daily trajectory",
+        "Solana makes a strong statement in the crypto space",
+        "Why traders cannot stop talking about Solana",
+        "Taking an energetic ride through Solana's charts",
+        "Solana proves its network power in real-time pricing",
+        "How Solana leaves a mark on today's market",
+        "An exciting recap of Solana's phenomenal run",
+        "Solana keeps the market on the edge of its seat",
+        "Why momentum seekers lean toward Solana today",
+        "Solana charges ahead with remarkable confidence",
+        "A fresh look at why Solana scales new heights",
+        "Solana thrives amidst high market energy today",
+        "What fuels Solana's unstoppable momentum right now",
+        "Solana delivers a masterclass in daily performance",
+        "Why Solana is the coin everyone tracks today",
+        "Solana powers through resistance levels like a breeze",
+        "Reflecting on Solana's incredible day in the markets"
+    ]
+}
+
+# Select title based specifically on the top coin performer
+selected_pool = coin_title_pools.get(top_coin_key, coin_title_pools['btc'])
+post_title = random.choice(selected_pool)
+
+# Generate local banner featuring the selected post title at the top
 local_banner_path = generate_crypto_banner(
+    post_title=post_title,
     top_coin_symbol=top_coin_key,
     top_coin_name=top_performer['name'],
     top_coin_price=top_performer['price'],
@@ -373,78 +583,7 @@ def format_row(key):
     price_str = f"${coin['price']:,.2f}" if coin['price'] >= 1 else f"${coin['price']:.4f}"
     return f"* 🪙 **{coin['name']} ({key.upper()}):** {price_str} | {emoji}{coin['change']:.2f}%"
 
-# ==========================================
-# HUMANOID, NON-COLON TITLE POOLS
-# ==========================================
-coin_title_pools = {
-    'btc': [
-        "Bitcoin is leading the pack again today",
-        "Looks like Bitcoin is making some serious moves",
-        "Why everyone is talking about Bitcoin right now",
-        "Bitcoin is setting the pace for the whole market",
-        "Catching up with Bitcoin and today's price action",
-        "Is Bitcoin getting ready for another big breakout",
-        "Checking in on what Bitcoin is up to today",
-        "Bitcoin is stealing the spotlight once again",
-        "A closer look at how Bitcoin is performing today",
-        "Why Bitcoin is driving the conversation today"
-    ],
-    'eth': [
-        "Ethereum is quietly making some impressive moves",
-        "Checking out Ethereum and where the altcoins are heading",
-        "Ethereum is heating up nicely in today's market",
-        "Why Ethereum is catching everyone's attention today",
-        "Taking a walk through Ethereum's latest price swings",
-        "Ethereum is leading the altcoin charge today",
-        "Seeing some great momentum on Ethereum right now",
-        "What is going on with Ethereum today",
-        "Ethereum is making waves in the market once more",
-        "A quick check on Ethereum's daily momentum"
-    ],
-    'bnb': [
-        "BNB is showing everyone how it's done today",
-        "Catching up with BNB and the broader exchange tokens",
-        "BNB is putting on a solid show in today's market",
-        "Why BNB is standing out among the top coins",
-        "Taking a quick look at BNB's price action today",
-        "BNB is making some nice headway in the charts",
-        "Keeping an eye on BNB as it leads the board",
-        "BNB is looking pretty strong in today's session",
-        "What's driving BNB's latest moves today",
-        "BNB is holding its ground and leading the gainers"
-    ],
-    'xrp': [
-        "XRP is making some noise in the market today",
-        "Seeing a nice push from XRP in today's session",
-        "Why XRP is stealing a bit of the spotlight today",
-        "Catching up with XRP's latest price movements",
-        "XRP is putting together a solid run today",
-        "Taking a look at why XRP is leading the charts",
-        "XRP is making some interesting waves right now",
-        "A quick check on how XRP is holding up today",
-        "XRP is showing some great energy in the market",
-        "What's happening with XRP in today's trading"
-    ],
-    'sol': [
-        "Solana is flying high and leading the charge today",
-        "Checking out Solana's latest fast-paced moves",
-        "Solana is putting on quite a show in the markets",
-        "Why Solana is outperforming the crowd today",
-        "Taking a look at Solana's momentum right now",
-        "Solana is catching a serious wave in today's session",
-        "What is pushing Solana to the front of the pack",
-        "Solana is keeping things exciting in the market today",
-        "A quick check on Solana's impressive run",
-        "Solana is showing off some serious strength today"
-    ]
-}
-
-# Select title based specifically on the top coin performer
-selected_pool = coin_title_pools.get(top_coin_key, coin_title_pools['btc'])
-selected_prefix = random.choice(selected_pool)
-post_title = selected_prefix
-
-raw_slug = selected_prefix.lower()
+raw_slug = post_title.lower()
 clean_chars = [char if char.isalnum() or char.isspace() else "" for char in raw_slug]
 slug_str = "-".join("".join(clean_chars).split())
 post_permlink = f"{slug_str}-{now_eat.strftime('%Y%m%d')}"
@@ -460,7 +599,7 @@ body_lines = [
     "Latest Prices (The Big Five):\n",
     format_row('btc'), format_row('eth'), format_row('bnb'), format_row('xrp'), format_row('sol'),
     f"\n🔺**Top Gainer:** {top_coin_key.upper()}\n",
-    f"![{selected_prefix}]({uploaded_image_url})",
+    f"![{post_title}]({uploaded_image_url})",
     f'<div class="footer">\n  <div class="pull-left">\n    Author: @blog.god\n  </div>\n  <div class="pull-right">\n    <img src="https://cdn.steemitimages.com/DQmeJV5dmDXBLXQHGxdfsDggpQNgBymH7wuuQSZ4pmyACVi/1000029381.png" alt="Footer" />\n  </div>\n</div>\n<div class="pull-left">\n  ©EGM 2016 - 2036\n</div>'
 ]
 
