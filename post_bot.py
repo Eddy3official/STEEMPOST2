@@ -23,7 +23,7 @@ time.sleep(random_delay_seconds)
 # 1. CONFIGURATION VARIABLES
 # ==========================================
 MY_ACCOUNT = "blog.god"  
-TARGET_COMMUNITY = "hive-183959"  
+TARGET_COMMUNITY = "hive-129948"  
 CUSTOM_TAGS = ["crypto", "cryptocurrency"]
 CRYPTO_KEYWORDS = ["crypto", "hodl", "usdt", "cryptocurrency", "bitcoin", "btc", "ethereum", "eth", "solana", "sol", "xrp", "ripple", "binance", "kr", "coingeco", "avle", "bnb", "trading", "blockchain"]
 
@@ -205,7 +205,7 @@ rc_manabar = account_info.get_rc_manabar()
 current_rc = (rc_manabar['current_mana'] / rc_manabar['max_mana']) * 100
 print(f"Account @{MY_ACCOUNT} Live Resource Credits check: {current_rc:.2f}%")
 
-if current_rc < 80.0:
+if current_rc < 89.0:
     print(f"⚠️ Safety Halt: Resource Credits dropped below threshold ({current_rc:.2f}%). Execution skipped.")
     exit(0)
 
