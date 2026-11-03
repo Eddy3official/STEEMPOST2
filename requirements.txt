@@ -1,3 +1,4 @@
 beem
+pillow
 websocket-client
 requests
