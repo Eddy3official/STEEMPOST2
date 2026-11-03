@@ -24,7 +24,7 @@ time.sleep(random_delay_seconds)
 # ==========================================
 MY_ACCOUNT = "blog.god"  
 TARGET_COMMUNITY = "hive-183959"  
-CUSTOM_TAGS = ["art", "crypto", "h4lab", "kr", "avle", "krsuccess"]
+CUSTOM_TAGS = ["crypto", "cryptocurrency"]
 CRYPTO_KEYWORDS = ["crypto", "hodl", "usdt", "cryptocurrency", "bitcoin", "btc", "ethereum", "eth", "solana", "sol", "xrp", "ripple", "binance", "kr", "coingeco", "avle", "bnb", "trading", "blockchain"]
 
 # ==========================================
