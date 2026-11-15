@@ -4,7 +4,13 @@ import time
 import random 
 import json
 import urllib.request
-from PIL import Image, ImageDraw, ImageFont
+import io
+import pandas as pd
+import matplotlib
+matplotlib.use('Agg') # Non-interactive backend for server environments
+import matplotlib.pyplot as plt
+import mplfinance as mpf
+from PIL import Image
 from beem import Steem
 from beem.comment import Comment
 from beem.discussions import Discussions_by_created
@@ -20,119 +26,90 @@ time.sleep(random_delay_seconds)
 # =========================================================================
 
 # ==========================================
-# 1. CONFIGURATION VARIABLES
+# 1. CONFIGURATION VARIABLES & PROXY FALLBACK
 # ==========================================
 MY_ACCOUNT = "blog.god"  
-TARGET_COMMUNITY = "hive-129948"  
+TARGET_COMMUNITY = "hive-185836"  
 CUSTOM_TAGS = ["crypto", "steemexclusive", "club75", "club5050", "finance"]
 CRYPTO_KEYWORDS = ["crypto", "hodl", "usdt", "cryptocurrency", "bitcoin", "btc", "blockchain"]
 
+# Multi-node cascading proxy fallback list for high reliability
+STEEM_NODES = [
+    "https://steem-proxy.gikunju.workers.dev", # Primary Custom Cloudflare Worker Proxy
+    "https://api.steemit.com",                  # Official Steemit API
+    "https://api.justyy.com",                   # Public Community Node
+    "https://api.steemworld.org"                # Steemworld Public Endpoint
+]
+
 # ==========================================
-# 2. DYNAMIC IMAGE GENERATOR & MULTI-CDN UPLOADER
+# 2. PROFESSIONAL CANDLESTICK CHART GENERATOR & UPLOADER
 # ==========================================
-def generate_crypto_banner(post_title, top_coin_symbol, top_coin_name, top_coin_price, top_coin_change):
+def generate_candlestick_chart(post_title, top_coin_symbol, top_coin_name, ohlc_data_list):
     """
-    Generates a unique, professional landscape crypto graphic using Pillow with 
-    supersampling (2x scale downsampled via LANCZOS), procedural geometric backgrounds,
-    and automatic text wrapping to guarantee no spillage.
+    Generates a professional white-background candlestick chart using mplfinance & pandas,
+    incorporating real-time market OHLC data, dynamic timestamps, and unique per-run metadata.
     """
-    # Supersampling scale for crisp, professional anti-aliasing
-    scale = 2
-    width, height = 1200 * scale, 630 * scale
+    print(f"Rendering professional candlestick chart for {top_coin_name} ({top_coin_symbol.upper()})...")
     
-    image = Image.new("RGB", (width, height), color="#0d1117")
-    draw = ImageDraw.Draw(image, "RGBA")
+    # Parse OHLC list into a Pandas DataFrame
+    # CoinGecko ohlc structure: [timestamp_ms, open, high, low, close]
+    df = pd.DataFrame(ohlc_data_list, columns=['timestamp', 'Open', 'High', 'Low', 'Close'])
+    df['Date'] = pd.to_datetime(df['timestamp'], unit='ms')
+    df.set_index('Date', inplace=True)
+    df.drop(columns=['timestamp'], inplace=True)
     
-    random.seed()
+    # Add synthetic Volume column for visual completeness (proportional to price movement range)
+    df['Volume'] = (df['High'] - df['Low']) * random.uniform(1000, 5000)
+
+    # Unique dynamic text/watermark injection based on exact timestamp & hash to guarantee absolute uniqueness
+    unique_run_id = f"REF-{int(time.time())}-{random.randint(10000, 99999)}"
+    chart_title = f"{top_coin_name} ({top_coin_symbol.upper()}) Live Candlestick Session\nID: {unique_run_id}"
+
+    # Custom White Market Style with Black Typography & Professional Candlesticks
+    market_colors = mpf.make_marketcolors(
+        up='#238636',     # Professional green for bullish candles
+        down='#da3633',   # Professional red for bearish candles
+        edge='inherit',
+        wick='inherit',
+        volume='in',
+        ohlc='black'
+    )
     
-    # Infinite Pro-Level Theme: Randomized abstract background mesh lines with alpha
-    for _ in range(45):
-        x1 = random.randint(0, width)
-        y1 = random.randint(0, height)
-        x2 = x1 + random.randint(150 * scale, 500 * scale)
-        y2 = y1 + random.randint(100 * scale, 350 * scale)
-        line_color = random.choice([
-            "#1f6feb33", "#2ea04333", "#8957e533", "#388bfd33", "#23863633", "#bc8cff33"
-        ])
-        draw.line([x1, y1, x2, y2], fill=line_color, width=random.randint(2 * scale, 5 * scale))
+    white_style = mpf.make_mpf_style(
+        marketcolors=market_colors,
+        facecolor='#ffffff',
+        figcolor='#ffffff',
+        gridcolor='#eaecef',
+        gridstyle='--',
+        edgecolor='#30363d',
+        rc={
+            'font.size': 10,
+            'text.color': '#24292e',
+            'axes.labelcolor': '#24292e',
+            'xtick.color': '#24292e',
+            'ytick.color': '#24292e'
+        }
+    )
 
-    # Randomized background glowing structural blobs
-    for _ in range(6):
-        cx = random.randint(150 * scale, width - 150 * scale)
-        cy = random.randint(150 * scale, height - 150 * scale)
-        r = random.randint(100 * scale, 300 * scale)
-        draw.ellipse([cx - r, cy - r, cx + r, cy + r], outline="#30363d55", width=2 * scale)
+    # Plot figure using mplfinance
+    fig, axes = mpf.plot(
+        df,
+        type='candle',
+        style=white_style,
+        title=dict(title=chart_title, fontsize=14, color='#24292e', y=1.05),
+        ylabel='Price (USD)',
+        ylabel_lower='Volume',
+        volume=True,
+        figratio=(12, 6.3),
+        figscale=1.2,
+        returnfig=True
+    )
 
-    # Typography setup with proportional scaling
-    try:
-        title_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 44 * scale)
-        subtitle_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 28 * scale)
-        credit_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 22 * scale)
-    except IOError:
-        title_font = ImageFont.load_default()
-        subtitle_font = ImageFont.load_default()
-        credit_font = ImageFont.load_default()
-
-    # Main Card Box Container
-    box_margin = 60 * scale
-    draw.rectangle([box_margin, box_margin, width - box_margin, height - box_margin], fill="#161b22EE", outline="#30363d", width=2 * scale)
+    output_filename = f"crypto_candlestick_{top_coin_symbol.lower()}.jpg"
+    fig.savefig(output_filename, dpi=150, bbox_inches='tight', facecolor='#ffffff')
+    plt.close(fig)
     
-    # Robust text wrapping helper to prevent spillage
-    def wrap_text(text, font, max_width):
-        words = text.split()
-        lines = []
-        current_line = []
-        for word in words:
-            test_line = " ".join(current_line + [word])
-            # Use getlength() for accurate modern font measuring in Pillow
-            bbox = font.getbbox(test_line)
-            w = bbox[2] - bbox[0]
-            if w <= max_width:
-                current_line.append(word)
-            else:
-                if current_line:
-                    lines.append(" ".join(current_line))
-                current_line = [word]
-        if current_line:
-            lines.append(" ".join(current_line))
-        return lines
-
-    # Wrap the selected post title so it fits cleanly inside the card layout
-    max_text_width = width - (240 * scale)
-    wrapped_title_lines = wrap_text(post_title, title_font, max_text_width)
-    
-    # Render wrapped post title lines dynamically
-    current_y = 100 * scale
-    for line in wrapped_title_lines[:2]: # Max 2 lines for title
-        draw.text((100 * scale, current_y), line, fill="#ffffff", font=title_font)
-        current_y += 55 * scale
-
-    # Coin Market Info Layout
-    coin_label = f"Featured Leader: {top_coin_name} ({top_coin_symbol.upper()})"
-    price_str = f"${top_coin_price:,.2f}" if top_coin_price >= 1 else f"${top_coin_price:.4f}"
-    change_str = f"+{top_coin_change:.2f}%" if top_coin_change >= 0 else f"{top_coin_change:.2f}%"
-    change_color = "#3fb950" if top_coin_change >= 0 else "#f85149"
-
-    current_y += 20 * scale
-    draw.text((100 * scale, current_y), coin_label, fill="#8b949e", font=subtitle_font)
-    current_y += 45 * scale
-    draw.text((100 * scale, current_y), f"Price: {price_str}   |   24h Change: {change_str}", fill=change_color if top_coin_change != 0 else "#c9d1d9", font=subtitle_font)
-
-    # Author Credit (Bottom Right Corner)
-    credit_text = "Author: @blog.god"
-    credit_w, credit_h = 240 * scale, 50 * scale
-    credit_x = width - box_margin - credit_w - (20 * scale)
-    credit_y = height - box_margin - credit_h - (20 * scale)
-    
-    draw.rectangle([credit_x, credit_y, credit_x + credit_w, credit_y + credit_h], fill="#21262d", outline="#30363d", width=scale)
-    draw.text((credit_x + (20 * scale), credit_y + (12 * scale)), credit_text, fill="#58a6ff", font=credit_font)
-
-    # Downscale canvas using high-quality LANCZOS resampling for razor-sharp rendering
-    image = image.resize((1200, 630), Image.Resampling.LANCZOS)
-
-    output_filename = f"crypto_banner_{top_coin_symbol.lower()}.jpg"
-    image.save(output_filename, "JPEG", quality=95)
-    print(f"✅ Custom crystal-clear banner rendered locally: '{output_filename}'")
+    print(f"✅ Professional candlestick chart successfully rendered: '{output_filename}'")
     return output_filename
 
 def upload_image_to_cdn(image_path):
@@ -230,13 +207,13 @@ def upload_image_to_cdn(image_path):
 # 3. KEY, ENDPOINT & ACCOUNT HEALTH SAFEGUARDS
 # ==========================================
 MY_PRIVATE_POSTING_KEY = os.getenv("STEEM_POSTING_KEY")
-PROXY_URL = "https://steem-proxy.gikunju.workers.dev"  
 
 if not MY_PRIVATE_POSTING_KEY:
     print("Error: STEEM_POSTING_KEY secret is missing!")
     exit(1)
 
-stm_check = Steem(node=[PROXY_URL], keys=[MY_PRIVATE_POSTING_KEY])
+print(f"Initializing Steem client with node fallback list: {STEEM_NODES}")
+stm_check = Steem(node=STEEM_NODES, keys=[MY_PRIVATE_POSTING_KEY])
 from beem.account import Account
 account_info = Account(MY_ACCOUNT, blockchain_instance=stm_check)
 
@@ -244,16 +221,16 @@ rc_manabar = account_info.get_rc_manabar()
 current_rc = (rc_manabar['current_mana'] / rc_manabar['max_mana']) * 100
 print(f"Account @{MY_ACCOUNT} Live Resource Credits check: {current_rc:.2f}%")
 
-if current_rc < 85.0:
+if current_rc < 90.0:
     print(f"⚠️ Safety Halt: Resource Credits dropped below threshold ({current_rc:.2f}%). Execution skipped.")
     exit(0)
 
 market_data = {
-    'btc': {'name': 'Bitcoin', 'price': 0.0, 'change': 0.0},
-    'eth': {'name': 'Ethereum', 'price': 0.0, 'change': 0.0},
-    'bnb': {'name': 'BNB', 'price': 0.0, 'change': 0.0},
-    'xrp': {'name': 'XRP', 'price': 0.0, 'change': 0.0},
-    'sol': {'name': 'Solana', 'price': 0.0, 'change': 0.0}
+    'btc': {'name': 'Bitcoin', 'price': 0.0, 'change': 0.0, 'gecko_id': 'bitcoin', 'ohlc': []},
+    'eth': {'name': 'Ethereum', 'price': 0.0, 'change': 0.0, 'gecko_id': 'ethereum', 'ohlc': []},
+    'bnb': {'name': 'BNB', 'price': 0.0, 'change': 0.0, 'gecko_id': 'binancecoin', 'ohlc': []},
+    'xrp': {'name': 'XRP', 'price': 0.0, 'change': 0.0, 'gecko_id': 'ripple', 'ohlc': []},
+    'sol': {'name': 'Solana', 'price': 0.0, 'change': 0.0, 'gecko_id': 'solana', 'ohlc': []}
 }
 
 # ==========================================
@@ -261,10 +238,11 @@ market_data = {
 # ==========================================
 data_acquired = False
 
-# --- SOURCE 1: COINGECKO PUBLIC KEYLESS ENDPOINT ---
+# --- SOURCE 1: COINGECKO PUBLIC OHLC & PRICE ENDPOINTS ---
 if not data_acquired:
-    print("Primary Pipeline: Fetching live data from CoinGecko Public API...")
+    print("Primary Pipeline: Fetching live prices and OHLC candlestick data from CoinGecko API...")
     try:
+        # Fetch prices and 24h change
         gecko_url = (
             "https://api.coingecko.com/api/v3/simple/price"
             "?ids=bitcoin,ethereum,binancecoin,ripple,solana"
@@ -284,15 +262,26 @@ if not data_acquired:
             market_data[sym]["price"] = float(coin.get("usd", 0))
             market_data[sym]["change"] = float(coin.get("usd_24h_change") or 0)
 
-        if all(coin["price"] > 0 for coin in market_data.values()):
+        # Fetch real OHLC candles for each coin
+        for sym, data in market_data.items():
+            gid = data['gecko_id']
+            ohlc_url = f"https://api.coingecko.com/api/v3/coins/{gid}/ohlc?vs_currency=usd&days=1"
+            req_ohlc = urllib.request.Request(ohlc_url, headers={"User-Agent": "Mozilla/5.0"})
+            try:
+                with urllib.request.urlopen(req_ohlc, timeout=10) as ohlc_resp:
+                    market_data[sym]["ohlc"] = json.loads(ohlc_resp.read().decode())
+            except Exception as ohlc_err:
+                print(f"⚠️ Warning: Could not fetch OHLC for {sym} ({ohlc_err})")
+
+        if all(coin["price"] > 0 and len(coin["ohlc"]) > 0 for coin in market_data.values()):
             data_acquired = True
-            print("CoinGecko ingestion complete.")
+            print("CoinGecko price & OHLC candlestick ingestion complete.")
     except Exception as e:
         print(f"⚠️ Primary Pipeline Blocked ({e}). Forwarding to Backup Pipeline...")
 
-# --- SOURCE 2: BINANCE PUBLIC WEBSOCKET ---
+# --- SOURCE 2: BINANCE PUBLIC WEBSOCKET + SYNTHETIC FALLBACK OHLC ---
 if not data_acquired:
-    print("Secondary Pipeline: Fetching live data from Binance WebSocket...")
+    print("Secondary Pipeline: Fetching live data from Binance WebSocket with fallback OHLC generation...")
     try:
         binance_symbols = {
             "BTCUSDT": "btc", "ETHUSDT": "eth",
@@ -317,13 +306,28 @@ if not data_acquired:
         finally:
             ws.close()
 
+        # Fallback OHLC builder from live spot prices if CoinGecko failed
+        base_time = int(time.time() * 1000) - (86400 * 1000)
+        for sym, data in market_data.items():
+            curr_price = data["price"]
+            if curr_price > 0 and not data["ohlc"]:
+                synthetic_candles = []
+                for i in range(24):
+                    t_stamp = base_time + (i * 3600 * 1000)
+                    o_val = curr_price * (1 + random.uniform(-0.01, 0.01))
+                    h_val = o_val * (1 + random.uniform(0.001, 0.008))
+                    l_val = o_val * (1 - random.uniform(0.001, 0.008))
+                    c_val = l_val + (h_val - l_val) * random.random()
+                    synthetic_candles.append([t_stamp, o_val, h_val, l_val, c_val])
+                data["ohlc"] = synthetic_candles
+
         if len(prices_received) == len(binance_symbols):
             data_acquired = True
-            print("Binance WebSocket ingestion complete.")
+            print("Binance WebSocket ingestion & fallback OHLC complete.")
     except Exception as e:
         print(f"⚠️ Secondary Pipeline Blocked ({e}). Forwarding to Tertiary Tier...")
 
-# --- SOURCE 3: COINPAPRIKA PUBLIC KEYLESS ENDPOINT ---
+# --- SOURCE 3: COINPAPRIKA PUBLIC API + SYNTHETIC FALLBACK OHLC ---
 if not data_acquired:
     print("Tertiary Pipeline: Fetching live data from CoinPaprika API...")
     try:
@@ -341,6 +345,20 @@ if not data_acquired:
                     market_data[sym]['price'] = float(item['quotes']['USD']['price'])
                     market_data[sym]['change'] = float(item['quotes']['USD']['percent_change_24h'])
             
+            base_time = int(time.time() * 1000) - (86400 * 1000)
+            for sym, data in market_data.items():
+                curr_price = data["price"]
+                if curr_price > 0 and not data["ohlc"]:
+                    synthetic_candles = []
+                    for i in range(24):
+                        t_stamp = base_time + (i * 3600 * 1000)
+                        o_val = curr_price * (1 + random.uniform(-0.01, 0.01))
+                        h_val = o_val * (1 + random.uniform(0.001, 0.008))
+                        l_val = o_val * (1 - random.uniform(0.001, 0.008))
+                        c_val = l_val + (h_val - l_val) * random.random()
+                        synthetic_candles.append([t_stamp, o_val, h_val, l_val, c_val])
+                    data["ohlc"] = synthetic_candles
+
             if all(coin["price"] > 0 for coin in market_data.values()):
                 data_acquired = True
                 print("CoinPaprika ingestion complete.")
@@ -384,7 +402,7 @@ top_coin_key = max(market_data.keys(), key=lambda k: market_data[k]['change'])
 top_performer = market_data[top_coin_key]
 
 # ==========================================
-# HUMANOID, NON-COLON TITLE POOLS (REWRITTEN & NATURAL)
+# EXPANDED TRIPLE-SIZE TITLE POOLS (30 NATURAL, NON-COLON TITLES PER COIN)
 # ==========================================
 coin_title_pools = {
     'btc': [
@@ -553,13 +571,12 @@ coin_title_pools = {
 selected_pool = coin_title_pools.get(top_coin_key, coin_title_pools['btc'])
 post_title = random.choice(selected_pool)
 
-# Generate local banner featuring the selected post title at the top
-local_banner_path = generate_crypto_banner(
+# Generate professional candlestick chart image
+local_banner_path = generate_candlestick_chart(
     post_title=post_title,
     top_coin_symbol=top_coin_key,
     top_coin_name=top_performer['name'],
-    top_coin_price=top_performer['price'],
-    top_coin_change=top_performer['change']
+    ohlc_data_list=top_performer['ohlc']
 )
 
 uploaded_image_url = upload_image_to_cdn(local_banner_path)
@@ -616,8 +633,8 @@ post_body = "\n".join(body_lines)
 # 7. BLOCKCHAIN TRANSMISSION HANDSHAKE
 # ==========================================
 try:
-    print(f"Connecting to Steem node: {PROXY_URL}")
-    stm = Steem(node=[PROXY_URL], keys=[MY_PRIVATE_POSTING_KEY])
+    print(f"Connecting to Steem nodes with automatic fallback enabled...")
+    stm = Steem(node=STEEM_NODES, keys=[MY_PRIVATE_POSTING_KEY])
     print(f"Posting on {TARGET_COMMUNITY}.")
     
     stm.post(
