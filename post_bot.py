@@ -63,7 +63,7 @@ def generate_candlestick_chart(post_title, top_coin_symbol, top_coin_name, ohlc_
 
     # Unique dynamic text/watermark injection based on exact timestamp & hash to guarantee absolute uniqueness
     unique_run_id = f"REF-{int(time.time())}-{random.randint(10000, 99999)}"
-    chart_title = f"{top_coin_name} ({top_coin_symbol.upper()}) Live Candlestick Session\nID: {unique_run_id}"
+    chart_title = f"{top_coin_name} ({top_coin_symbol.upper()})\nID: {unique_run_id}"
 
     # Custom White Market Style with Black Typography & Professional Candlesticks
     market_colors = mpf.make_marketcolors(
