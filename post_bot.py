@@ -29,7 +29,7 @@ time.sleep(random_delay_seconds)
 # 1. CONFIGURATION VARIABLES & PROXY FALLBACK
 # ==========================================
 MY_ACCOUNT = "blog.god"  
-TARGET_COMMUNITY = "hive-129948"  
+TARGET_COMMUNITY = "hive-188619"  
 CUSTOM_TAGS = ["kr", "zzan", "aaa", "dblog", "avle-steem", "pircoin", "krsuccess"]
 CRYPTO_KEYWORDS = ["crypto", "hodl", "usdt", "cryptocurrency", "bitcoin", "btc", "blockchain"]
 
