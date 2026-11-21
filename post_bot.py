@@ -30,7 +30,7 @@ time.sleep(random_delay_seconds)
 # ==========================================
 MY_ACCOUNT = "blog.god"  
 TARGET_COMMUNITY = "hive-129948"  
-CUSTOM_TAGS = ["crypto", "hungry-griffin", "steemhunt"]
+CUSTOM_TAGS = ["crypto", "steemexclusive", "club100", "steemhunt"]
 CRYPTO_KEYWORDS = ["crypto", "hodl", "usdt", "cryptocurrency", "bitcoin", "btc", "blockchain"]
 
 # Multi-node cascading proxy fallback list for high reliability
