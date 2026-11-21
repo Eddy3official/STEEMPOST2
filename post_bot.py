@@ -35,10 +35,11 @@ CRYPTO_KEYWORDS = ["crypto", "hodl", "usdt", "cryptocurrency", "bitcoin", "btc",
 
 # Multi-node cascading proxy fallback list for high reliability
 STEEM_NODES = [
-    "https://steem-proxy.gikunju.workers.dev", # Primary Custom Cloudflare Worker Proxy
-    "https://api.steemit.com",                  # Official Steemit API
-    "https://api.justyy.com",                   # Public Community Node
-    "https://api.steemworld.org"                # Steemworld Public Endpoint
+    "https://api.moecki.online",
+    "https://api.campingclub.me",
+    "https://api2.justyy.com",
+    "https://api3.justyy.com",
+    "https://steem-proxy.gikunju.workers.dev"
 ]
 
 # ==========================================
