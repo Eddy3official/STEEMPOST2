@@ -30,6 +30,8 @@ TARGET_COMMUNITY = "hive-129948"
 CUSTOM_TAGS = ["crypto", "steemexclusive", "club100", "marketupdate"]
 CRYPTO_KEYWORDS = ["crypto", "hodl", "usdt", "cryptocurrency", "bitcoin", "btc", "blockchain", "solana", "ethereum"]
 MIN_RC_THRESHOLD = 70.0
+FOOTER_IMAGE_URL = "https://cdn.steemitimages.com/DQmeJV5dmDXBLXQHGxdfsDggpQNgBymH7wuuQSZ4pmyACVi/1000029381.png"
+HOMMAGE_URL = "https://chromewebstore.google.com/detail/empty-title/gepddagaajclednflogimfmpoejjkcnj"
 
 STEEM_NODES = [
     "https://api.moecki.online",
@@ -101,41 +103,85 @@ def upload_image_to_cdn(image_path):
     with open(image_path, "rb") as f:
         file_data = f.read()
 
-    uploaders = [
-        ("Catbox.moe", "https://catbox.moe/user/api.php", "reqtype", "upload-file", "fileToUpload"),
-        ("TmpFiles", "https://tmpfiles.org/api/v1/upload", None, None, "file"),
-    ]
+    # Tier 1: Imgur anonymous upload (reliable HTTPS link for Steem image proxies)
+    try:
+        client_id = "546c25a59c58ad7"
+        boundary = "----ImgurBoundary7MA4YWxkTrZu0gW"
+        body = (
+            f"--{boundary}\r\n"
+            f'Content-Disposition: form-data; name="image"; filename="{image_path}"\r\n'
+            f"Content-Type: image/jpeg\r\n\r\n"
+        ).encode("utf-8") + file_data + f"\r\n--{boundary}--\r\n".encode("utf-8")
 
-    for label, endpoint, extra_field, extra_val, file_field in uploaders:
-        try:
-            boundary = "----SteemBotBoundary7MA4YWxkTrZu0gW"
-            parts = []
-            if extra_field and extra_val:
-                parts.append(
-                    f"--{boundary}\r\nContent-Disposition: form-data; name=\"{extra_field}\"\r\n\r\n{extra_val}\r\n".encode("utf-8")
-                )
-            parts.append(
-                f"--{boundary}\r\nContent-Disposition: form-data; name=\"{file_field}\"; filename=\"{image_path}\"\r\nContent-Type: image/jpeg\r\n\r\n".encode("utf-8")
-                + file_data
-                + f"\r\n--{boundary}--\r\n".encode("utf-8")
-            )
-            body = b"".join(parts)
-            req = urllib.request.Request(
-                endpoint,
-                data=body,
-                headers={"Content-Type": f"multipart/form-data; boundary={boundary}", "User-Agent": "Mozilla/5.0"},
-                method="POST",
-            )
-            with urllib.request.urlopen(req, timeout=20) as resp:
-                raw = resp.read().decode("utf-8").strip()
-                if raw.startswith("http"):
-                    return raw
-                parsed = json.loads(raw)
-                url = parsed.get("data", {}).get("url", "")
-                if url:
-                    return url.replace("tmpfiles.org/", "tmpfiles.org/dl/")
-        except Exception as err:
-            print(f"⚠️ {label} upload failed: {err}")
+        req = urllib.request.Request(
+            "https://api.imgur.com/3/image",
+            data=body,
+            headers={
+                "Authorization": f"Client-ID {client_id}",
+                "Content-Type": f"multipart/form-data; boundary={boundary}",
+                "User-Agent": "Mozilla/5.0",
+            },
+            method="POST",
+        )
+        with urllib.request.urlopen(req, timeout=20) as response:
+            res_json = json.loads(response.read().decode())
+            if res_json.get("success") and res_json.get("data", {}).get("link"):
+                url = res_json["data"]["link"]
+                print(f"✅ Imgur Upload Success: {url}")
+                return url
+    except Exception as err:
+        print(f"⚠️ Imgur upload failed: {err}")
+
+    # Tier 2: Catbox.moe
+    try:
+        boundary = "----CatboxBoundary7MA4YWxkTrZu0gW"
+        body = (
+            f"--{boundary}\r\n"
+            f'Content-Disposition: form-data; name="reqtype"\r\n\r\n'
+            f"upload-file\r\n"
+            f"--{boundary}\r\n"
+            f'Content-Disposition: form-data; name="fileToUpload"; filename="{image_path}"\r\n'
+            f"Content-Type: image/jpeg\r\n\r\n"
+        ).encode("utf-8") + file_data + f"\r\n--{boundary}--\r\n".encode("utf-8")
+
+        req = urllib.request.Request(
+            "https://catbox.moe/user/api.php",
+            data=body,
+            headers={"Content-Type": f"multipart/form-data; boundary={boundary}", "User-Agent": "Mozilla/5.0"},
+            method="POST",
+        )
+        with urllib.request.urlopen(req, timeout=20) as response:
+            url = response.read().decode("utf-8").strip()
+            if url.startswith("http"):
+                print(f"✅ Catbox Upload Success: {url}")
+                return url
+    except Exception as err:
+        print(f"⚠️ Catbox upload failed: {err}")
+
+    # Tier 3: TmpFiles
+    try:
+        boundary = "----TmpFilesBoundary7MA4YWxkTrZu0gW"
+        body = (
+            f"--{boundary}\r\n"
+            f'Content-Disposition: form-data; name="file"; filename="{image_path}"\r\n'
+            f"Content-Type: image/jpeg\r\n\r\n"
+        ).encode("utf-8") + file_data + f"\r\n--{boundary}--\r\n".encode("utf-8")
+
+        req = urllib.request.Request(
+            "https://tmpfiles.org/api/v1/upload",
+            data=body,
+            headers={"Content-Type": f"multipart/form-data; boundary={boundary}", "User-Agent": "Mozilla/5.0"},
+            method="POST",
+        )
+        with urllib.request.urlopen(req, timeout=20) as response:
+            parsed = json.loads(response.read().decode())
+            raw_url = parsed.get("data", {}).get("url", "")
+            if raw_url:
+                direct_url = raw_url.replace("tmpfiles.org/", "tmpfiles.org/dl/")
+                print(f"✅ TmpFiles Upload Success: {direct_url}")
+                return direct_url
+    except Exception as err:
+        print(f"🚨 All CDN uploads failed: {err}")
 
     return None
 
@@ -274,7 +320,7 @@ def format_price(val):
     return f"${val:,.2f}" if val >= 1 else f"${val:.4f}"
 
 
-def build_coin_title_and_article(top_key, snapshot, headlines, formatted_date, timestamp_str, shoutout_line):
+def build_coin_title_and_article(top_key, snapshot, headlines, formatted_date, timestamp_str):
     coin = snapshot[top_key]
     name = coin["name"]
     sym = top_key.upper()
@@ -313,7 +359,6 @@ def build_coin_title_and_article(top_key, snapshot, headlines, formatted_date, t
 
     title = random.choice(titles_by_coin.get(top_key, titles_by_coin["btc"]))
 
-    # Keep all 5 coins in the market snapshot, while centering the narrative on `top_key`
     other_leaders = sorted(
         [(k, v) for k, v in snapshot.items() if k != top_key],
         key=lambda kv: kv[1]["change"],
@@ -384,10 +429,10 @@ try:
     if shoutout_post:
         s_author = shoutout_post["author"]
         s_permlink = shoutout_post["permlink"]
-        shoutout_line = f"Community spotlight: shout-out to @{s_author} for sharing [{s_permlink}](https://steemit.com/@{s_author}/{s_permlink})."
+        shoutout_line = f"A big shout-out to @{s_author} for keeping up with the crypto space today! Check out their latest update here: **[{s_permlink}](https://steemit.com/@{s_author}/{s_permlink})**"
 
     post_title, article_body = build_coin_title_and_article(
-        top_coin_key, snapshot, headlines, formatted_date, timestamp_str, shoutout_line
+        top_coin_key, snapshot, headlines, formatted_date, timestamp_str
     )
 
     raw_slug = "".join(ch if ch.isalnum() or ch.isspace() else "" for ch in post_title.lower())
@@ -402,22 +447,36 @@ try:
         rows.append(f"* {badge} **{c['name']} ({k.upper()}){marker}:** {format_price(c['price'])} ({c['change']:+.2f}%)")
 
     body_sections = [
-        f"**{formatted_date}** • *{timestamp_str}*",
+        f"**{formatted_date}**  🕘 *{timestamp_str}*",
+        f"*Layout provided by [Steemit Enhancer hommage]({HOMMAGE_URL}) by ayogom*",
         article_body,
     ]
     if shoutout_line:
         body_sections.append(shoutout_line)
 
+    footer_block = (
+        f'<div class="footer">\n'
+        f'  <div class="pull-left">\n'
+        f'    Author: @{MY_ACCOUNT}\n'
+        f'  </div>\n'
+        f'  <div class="pull-right">\n'
+        f'    <img src="{FOOTER_IMAGE_URL}" alt="Footer" />\n'
+        f'  </div>\n'
+        f'</div>\n'
+        f'<div class="pull-left">\n'
+        f'  ©EGM {current_year}\n'
+        f'</div>'
+    )
+
     body_sections.extend([
-        f"![{post_title}]({image_url})",
         "### Snapshot (Major Assets)\n" + "\n".join(rows),
+        f"![{post_title}]({image_url})",
         "> *Disclaimer: Market figures and news items are for informational purposes only and are not financial or investment advice.*",
-        f'<div class="footer"><div class="pull-left">Author: @{MY_ACCOUNT}</div></div>\n<div class="pull-left">©EGM {current_year}</div>',
+        footer_block,
     ])
 
     post_body = "\n\n".join(body_sections)
 
-    # Deduplicate tags while keeping community first and top coin tag guaranteed
     final_tags = []
     for t in [TARGET_COMMUNITY, top_tag] + CUSTOM_TAGS:
         clean_t = str(t).strip().lower()
