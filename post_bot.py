@@ -34,7 +34,6 @@ TARGET_COMMUNITIES = [
     "hive-180932",
     "hive-166405",
     "hive-183397",
-    "hive-150122",
     "hive-196917",
     "hive-183369",
     "hive-144064",
