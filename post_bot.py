@@ -26,7 +26,20 @@ time.sleep(random_delay_seconds)
 # 1. CONFIGURATION
 # =========================================================================
 MY_ACCOUNT = "blog.god"
-TARGET_COMMUNITY = "hive-129948"
+TARGET_COMMUNITIES = [
+    "hive-129948",
+    "hive-188619",
+    "hive-185836",
+    "hive-193637",
+    "hive-180932",
+    "hive-166405",
+    "hive-183397",
+    "hive-150122",
+    "hive-196917",
+    "hive-183369",
+    "hive-144064",
+    "hive-183959",
+]
 CUSTOM_TAGS = ["crypto", "steemexclusive", "club100", "marketupdate"]
 CRYPTO_KEYWORDS = ["crypto", "hodl", "usdt", "cryptocurrency", "bitcoin", "btc", "blockchain", "solana", "ethereum"]
 MIN_RC_THRESHOLD = 90.0
@@ -151,7 +164,7 @@ TITLES_BY_COIN = {
         "Price Check on {name} ({sym}): Hovering Near {price_str}",
         "{name} Stands Out Today With a {change_str} Move",
         "Latest {name} View: {price_str} ({change_str}) Over 24h",
-        "{name} ({sym}) Leads Session Movers at {price_str}",
+        "{name} Leads Session Movers at {price_str}",
         "Today's {name} Snapshot: {change_str} Near {price_str}",
         "{name} ({sym}) Momentum Check at {price_str} ({change_str})",
     ],
@@ -673,13 +686,15 @@ try:
 
     post_body = "\n\n".join(body_sections)
 
+    target_community = random.choice(TARGET_COMMUNITIES)
+
     final_tags = []
-    for t in [TARGET_COMMUNITY, top_tag] + CUSTOM_TAGS:
+    for t in [target_community, top_tag] + CUSTOM_TAGS:
         clean_t = str(t).strip().lower()
         if clean_t and clean_t not in final_tags:
             final_tags.append(clean_t)
 
-    print(f"Publishing '{post_title}' with tags {final_tags}...")
+    print(f"Publishing '{post_title}' to {target_community} with tags {final_tags}...")
     stm.post(
         title=post_title,
         body=post_body,
@@ -687,9 +702,9 @@ try:
         permlink=post_permlink,
         tags=final_tags,
         parent_author="",
-        parent_permlink=TARGET_COMMUNITY,
+        parent_permlink=target_community,
     )
-    print(f"✅ Successfully published to {TARGET_COMMUNITY}!")
+    print(f"✅ Successfully published to {target_community}!")
 
 except Exception as e:
     print(f"CRITICAL ERROR: {e}")
