@@ -27,17 +27,8 @@ time.sleep(random_delay_seconds)
 # =========================================================================
 MY_ACCOUNT = "blog.god"
 TARGET_COMMUNITIES = [
-    "hive-129948",
-    "hive-188619",
     "hive-185836",
-    "hive-193637",
-    "hive-180932",
     "hive-166405",
-    "hive-183397",
-    "hive-196917",
-    "hive-183369",
-    "hive-144064",
-    "hive-183959",
 ]
 CUSTOM_TAGS = ["crypto", "steemexclusive", "club100", "marketupdate"]
 CRYPTO_KEYWORDS = ["crypto", "hodl", "usdt", "cryptocurrency", "bitcoin", "btc", "blockchain", "solana", "ethereum"]
