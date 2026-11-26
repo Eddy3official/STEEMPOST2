@@ -27,12 +27,12 @@ time.sleep(random_delay_seconds)
 # =========================================================================
 MY_ACCOUNT = "blog.god"
 TARGET_COMMUNITIES = [
-    "hive-129948",
+    "hive-185836",
     "hive-166405",
 ]
 CUSTOM_TAGS = ["crypto", "steemexclusive", "club100", "marketupdate"]
 CRYPTO_KEYWORDS = ["crypto", "hodl", "usdt", "cryptocurrency", "bitcoin", "btc", "blockchain", "solana", "ethereum"]
-MIN_RC_THRESHOLD = 96.0
+MIN_RC_THRESHOLD = 90.0
 FOOTER_IMAGE_URL = "https://cdn.steemitimages.com/DQmeJV5dmDXBLXQHGxdfsDggpQNgBymH7wuuQSZ4pmyACVi/1000029381.png"
 HOMMAGE_URL = "https://chromewebstore.google.com/detail/empty-title/gepddagaajclednflogimfmpoejjkcnj"
 
