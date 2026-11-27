@@ -29,7 +29,7 @@ MY_ACCOUNT = "blog.god"
 TARGET_COMMUNITIES = [
     "hive-185836",
     "hive-166405",
-    "hive-129948"
+    "hive-183959"
 ]
 CUSTOM_TAGS = ["crypto", "steemexclusive", "club100", "marketupdate"]
 CRYPTO_KEYWORDS = ["crypto", "hodl", "usdt", "cryptocurrency", "bitcoin", "btc", "blockchain", "solana", "ethereum"]
