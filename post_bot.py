@@ -18,7 +18,7 @@ from beem.discussions import Discussions_by_created
 # =========================================================================
 # GITHUB ACTIONS RUNTIME DELAY BUFFER
 # =========================================================================
-random_delay_seconds = random.randint(0, 0)
+random_delay_seconds = random.randint(60, 600)
 print(f"[DELAY] Sleeping {random_delay_seconds / 60:.1f} minutes before running...")
 time.sleep(random_delay_seconds)
 
